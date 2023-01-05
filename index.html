@@ -309,6 +309,7 @@
         curr -= 1;
         question.innerText = questions[curr];
         ans.innerHTML = updateButtons();
+        progresss.innerText = `${curr}/25`;
         nxtButtons();
         nextButton.classList.add("invisible");
       } else {
