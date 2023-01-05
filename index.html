@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" questions="IE=edge" />
+    <meta name="viewport" questions="width=device-width, initial-scale=1.0" />
+    <title>Yeslife/Nolife ?</title>
+    <link rel="icon" href="./fav.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+      integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      body {
+        font-family: "Roboto Slab", serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900">
+    <main class="text-white relative flex flex-col justify-center text-center">
+      <button
+        id="back"
+        class="absolute lg:text-3xl top-0 m-16 text-5xl flex flex-row gap-4 items-center"
+      >
+        <i class="fa-solid fa-arrow-left"></i> <span>Retour</span>
+      </button>
+      <div id="main" class="flex flex-col">
+        <div id="progress" class="mt-24"></div>
+        <h3 id="question" class="lg:text-3xl text-5xl p-8">
+          Complète le test pour découvrir si tu est un Yeslife
+        </h3>
+        <div id="nbInput"></div>
+        <div id="answersDiv" class="grid max-w-[90vw] mx-auto mb-32"></div>
+        <button
+          id="next"
+          class="bg-blue-600 lg:text-3xl text-5xl rounded-lg py-4 px-8 mb-8 shadow hover:bg-blue-700 focus:outline-none mx-auto transition duration-150"
+        >
+          Commencer le test
+        </button>
+      </div>
+    </main>
+  </body>
+
+  <script>
+    questions = {
+      1: `Combien as-tu d’amis (personne hors famille que tu côtoie même rarement en dehors des études/travail/club sportif/asso etc.) ?`,
+      2: `Combien as-tu d’amis proches (potes que tu côtoie souvent et dont tu fais partie aussi de leurs meilleurs potes) ?`,
+      3: `A quelle fréquence sort-tu avec des potes (soirée ou activité ou juste boire un verre) ?`,
+      4: `Es-tu déjà parti en vacances avec des amis ou ta meuf/mec ?`,
+      5: `Combien d’abonnés sur Insta ?`,
+      6: `Avec qui fêtes-tu le nouvel an en général ?`,
+      7: `Entretiens-tu de bonnes relations avec les membres de ta famille ?`,
+      8: `Avec qui fête-tu Noël en général ?`,
+      9: `Que pensent les gens de ta famille de toi ?`,
+      10: `Quel âge as-tu ?"`,
+      11: `Combien de fois as-tu eu des relations sexuelles (hors escort etc. évidemment) ? NB: passez cette question si vous n’êtes pas un mec et/ou que vous avez moins de 16 ans et/ou que votre religion vous interdit d’avoir des rapports sexuels avant mariage.`,
+      12: `As-tu déjà été en couple ? Attention ! Divise le nombre de points obtenus par 2 si tu n'étais pas heureux dans ta relation.`,
+      13: `T’es tu déjà fait cuck quand tu étais en couple ?`,
+      14: `Quand tu parles à une personne du sexe opposé:`,
+      15: `Quelles est ta situation pro/scolaire ?`,
+      16: `Quelle est ta situation financière ?`,
+      17: `Es-tu indépendant financièrement ?`,
+      18: `Combien de douches par semaine ?`,
+      19: `Combien de séances de sport par semaine ?`,
+      20: `Physionomie:`,
+      21: `As-tu une addiction (les points se cumulent) ?`,
+      22: `As-tu au moins une passion ?`,
+      23: `Es-tu bon dans une activité/sport etc. (les points se cumulent par activité) ?`,
+      24: `Combien de langues parles-tu couramment ?`,
+      25: `As-tu l’impression d’être cultivé ?`,
+    };
+
+    answers = {
+      1: {
+        "0 ami": -20,
+        "1-3 amis": -10,
+        "4-8 amis": -5,
+        "9-12 amis": 0,
+        "13-19 amis": 5,
+        "20+ amis": 10,
+      },
+      2: {
+        " ami": -10,
+        "1-2 amis proches": -5,
+        "3-5 amis proches": 0,
+        "5+ amis proches": 5,
+      },
+      3: {
+        "Jamais ou quasi-jamais": -15,
+        "1 fois/mois": -5,
+        "2-3 fois/mois": 0,
+        "Au moins 1 fois/semaine": 5,
+      },
+
+      4: {
+        "Jamais de toute ma vie": -10,
+        "Oui mais rarement": -5,
+        "Pas tous les ans mais presque": 0,
+        "Minimum 1 fois/an": 5,
+      },
+
+      5: {
+        "Je n’ai pas Insta / moins de 100": -5,
+        "Entre 100 et 199 / moins de 100 mais parce que j’accepte que mes amis dessus": 0,
+        "200 ou plus et + de 80 likes sur mes photos": 5,
+        "300 ou plus et + de 200 likes sur mes photos": 15,
+      },
+
+      6: {
+        "Tout seul / parents / forêt": -5,
+        "En famille mais par choix": 0,
+        "Avec moins de 3 potes": 0,
+        "Avec tes meilleurs potes chez toi ou chez eux": 5,
+      },
+
+      7: {
+        "Non et je ne les vois quasiment jamais": -20,
+        "Non, je n’en vois que quelques-uns": -10,
+        "Non, je suis fâché avec la plupart mais on se voit quand même de temps en temps":
+          -5,
+        "Les relations sont un peu tendues mais on se voit régulièrement": 0,
+        "Plutôt oui": 5,
+        "Oui, très bonnes avec tout le monde ou presque": 10,
+      },
+
+      8: {
+        "Tout seul": -10,
+        "Avec des amis": 0,
+        "En famille": 5,
+      },
+
+      9: {
+        "Je suis la honte de la famille": -10,
+        "Ils m’aiment bien mais je leur fais un peu honte": -5,
+        "Rien de plus que pour les autres": 0,
+        "Ils sont plutôt fiers de moi": 5,
+        "Je suis la fierté de la famille": 10,
+      },
+
+      10: {
+        "Moins de 16 ans": 20,
+        "16-20 ans": 10,
+        "21-24 ans": 0,
+        "25-29 ans": -10,
+        "Plus de 30 ans": -20,
+      },
+
+      11: {
+        "Je suis puceau": -10,
+        "Moins de 3": -5,
+        "3-5": 0,
+        "5-10": -5,
+        "10-20": 10,
+        "Plus de 20": 15,
+        Passer: +20,
+      },
+
+      12: {
+        "Non jamais": -5,
+        "Oui mais jamais plus de 3 mois": 0,
+        "Oui, mais jamais plus d’un an": 10,
+        "Oui, et plus d’un an": 20,
+        "Oui, et plus de 3 ans": 30,
+      },
+
+      13: {
+        "Non, pas à ma connaissance": 0,
+        "Oui, mais balec": -5,
+        "Oui et j’ai été humilié": -10,
+        "Oui, j’ai été humilié et tout le monde le sait": -15,
+      },
+
+      14: {
+        "Tu ne leur parle jamais": -10,
+        "Tu es mal à l’aise, rougie, bégaye": -5,
+        "Tu es un peu stressé": 0,
+        "Tu es plutôt à l’aise": 5,
+        "Tu es très à l’aise et les séduit rapidement": 10,
+      },
+
+      15: {
+        "Je n’ai jamais travaillé plus de 2 mois et je ne suis plus scolarisé":
+          -20,
+        "Je ne travaille pas et je ne suis plus scolarisé": -15,
+        "Je n’ai plus de travail depuis moins de 3 mois et j’en cherche un ou une formation":
+          -10,
+        "Je fais un travail / des études qui ne me plaisent pas / où je suis en échec":
+          -5,
+        "Je fais un travail/études qui me plaisent mais pas plus que ça": 5,
+        "Je fais un travail qui me plaît ou des études plutôt brillantes": 10,
+        "Je fais un travail qui me passionne et/où qui rapporte beaucoup d’argent ou des études très brillantes": 15,
+      },
+
+      16: {
+        "Je suis SDF": -25,
+        "Je suis souvent à découvert": -15,
+        "C’est un peu la galère mais je m’en sors": -5,
+        Correcte: 0,
+        "Plutôt aisée": 5,
+        Aisée: 10,
+        "Je suis pété de thunes": 15,
+        "Je suis millionnaire": 25,
+      },
+
+      17: {
+        Non: 0,
+        Oui: 10,
+      },
+
+      18: {
+        "Entre 0 et 3": -15,
+        "Entre 3 et 6": -5,
+        "7 ou plus": 0,
+      },
+
+      19: {
+        0: -5,
+        "1 ou 2": 0,
+        "Plus de 2": 5,
+      },
+
+      20: {
+        "Obèse ou anorexique": -15,
+        "Gros ou très maigre": -5,
+        "Dans la moyenne": 0,
+        "Musclé/bien bâti": 5,
+      },
+
+      21: {
+        "A une drogue dure": -25,
+        "A l’alcool ou au cannabis (addiction hein, pas juste en consommer en soirée)":
+          -15,
+        "Au porno, tabac": -10,
+        "Aux jeux vidéo / fast food / internet / séries": -5,
+        Aucune: 0,
+      },
+
+      22: {
+        "Non, ou alors que des choses dont j’ai honte de parler ou qui n’intéresse personne":
+          -5,
+        "Oui, mais je n’y passe pas beaucoup de temps et ça n’intéresse pas grand monde": 0,
+        "Oui, j’y passe pas mal de temps et les gens sont généralement intéressés quand j’en parle": 5,
+        "Oui, j’y passe beaucoup de temps et les gens sont passionnés quand j’en parle": 10,
+      },
+
+      23: {
+        "Non, je ne suis bon dans rien sauf des trucs qui n’intéresse pas les gens (jeux vidéo etc.)": 0,
+        "Je suis plutôt bon dans une activité": 5,
+        "Je suis très bon dans une activité et les gens sont généralement impressionnés lorsque je pratique": 10,
+        "Je suis vraiment excellent et renommé dans une activité": 25,
+      },
+
+      24: {
+        "1 langues": 0,
+        "2 langues": 5,
+        "3 ou plus": 10,
+      },
+
+      25: {
+        "Non, pas plus que la moyenne voire moins": 0,
+        "Plus que la moyenne": 5,
+        "Sans prétention, beaucoup plus que la moyenne": 10,
+      },
+    };
+
+    blueButton = `Question suivante`;
+
+    let score = 0;
+    let curr = 0;
+    let res = new Array(26);
+
+    function updateScore(pts) {
+      res[curr - 1] = pts;
+    }
+
+    function updateButtons() {
+      let out = ``;
+
+      for (const answ in answers[curr]) {
+        // console.log(`${answ}: ${answers[curr][answ]}`);
+        out += `<button onclick="updateScore(${answers[curr][answ]})" class="nxt bg-blue-600 text-3xl lg:text-xl rounded-lg py-4 px-8 m-4 shadow hover:bg-blue-700 focus:outline-none mx-auto transition duration-150">${answ}</button>`;
+      }
+
+      return out;
+    }
+
+    function nxtButtons() {
+      let nextQues = document.querySelectorAll(".nxt");
+
+      nextQues.forEach((nxt) => {
+        nxt.addEventListener("click", nextQuestion);
+      });
+    }
+
+    function prevQuestion() {
+      const target = document.getElementById("value");
+      if (curr > 1) {
+        curr -= 1;
+        question.innerText = questions[curr];
+        ans.innerHTML = updateButtons();
+        nxtButtons();
+        nextButton.classList.add("invisible");
+      } else {
+        return 0;
+      }
+    }
+
+    function nextQuestion() {
+      const target = document.getElementById("value");
+      if (!target || target.value != 0) {
+        if (curr <= 24) {
+          curr += 1;
+          question.innerText = questions[curr];
+          ans.innerHTML = updateButtons();
+          progresss.innerText = `${curr}/25`;
+          nxtButtons();
+          nextButton.classList.add("invisible");
+        } else {
+          finishTest();
+          return 0;
+        }
+      }
+    }
+
+    let lastScreen = `
+    <div class="text-white text-lg flex flex-col gap-2 w-4/5 mx-auto text-left">
+      <p class="text-center text-3xl underline">Barème</p>
+      <p>
+        - <span class="underline">100 point ou moins</span>: Tu es un déchet
+        (désolé du terme mais là franchement c’est très grave). La vie n’est pas
+        irréversible mais elle est courte donc il faut reprendre ta vie en main
+        très rapidement.
+      </p>
+      <p>
+        - <span class="underline">Entre -99 et - 50</span>: Tu es un nolife. Tu
+        es en train de passer complètement à côté de la vie, il n’y a plus de
+        temps à perdre, il faut agir vite.
+      </p>
+      <p>
+        - <span class="underline">Entre -49 et -1</span>: Tu es un semi-nolife.
+        Tu possède des attributs des no life mais ta situation n’est pas aussi
+        grave. Les yes life te méprisent quand même, il va falloir se sortir les
+        doigts du cul si tu veux t’en sortir.
+      </p>
+      <p>
+        - <span class="underline">Entre 0 et 49</span>: Tu es un semi-yeslife.
+        Tu es tout à fait apte à côtoyer des yes life mais tu n’as pas tous
+        leurs attributs. Ils pourraient te prendre pour un des leurs mais
+        verrons vite le vide en cherchant à mieux te connaître. Bref, tu es apte
+        à la vie en société mais les gens auront souvent un peu pitié de toi. En
+        bossant sur toi tu pourras devenir un yes life !
+      </p>
+      <p>
+        - <span class="underline">De 50 à 100</span>: Félicitations, tu es un
+        yeslife ! Attention, cela ne veut pas dire que tu es exceptionnel, juste
+        quelqu’un de normal et épanoui, qui est apte à vivre en société.
+      </p>
+      <p>
+        - <span class="underline">Plus de 100</span>: Bravo, tu es un yeslife
+        accompli ! Tu croques la vie à pleines dents.
+      </p>
+    </div>`;
+
+    function finishTest() {
+      score = res.reduce((a, b) => a + b, 0);
+
+      let img = "";
+
+      if (score < -100) img = "./Déchet.png";
+      if (score >= -100) img = "./Nolife.png";
+      if (score >= -50) img = "./Semi-Nolife.png";
+      if (score >= 0) img = "./Semi-Yeslife.png";
+      if (score >= 50) img = "./Yeslife.png";
+      if (score > 100) img = "./Chad.png";
+
+      let name = img
+        .replace(/\.[^/.]+$/, "")
+        .replace(/\./g, "")
+        .slice(1);
+
+      progress.innerHTML = `<img class="h-64 lg:h-32 w-64 lg:w-32 rounded-full border-4 shadow mx-auto" src="${img}" alt="" srcset="">`;
+      question.innerText = `Score: ${score} = ${name}`;
+      ans.innerHTML = lastScreen;
+      console.log(score);
+    }
+
+    let back = document.getElementById("back");
+    let progresss = document.getElementById("progress");
+    let question = document.getElementById("question");
+    let ans = document.getElementById("answersDiv");
+    let nextButton = document.getElementById("next");
+
+    nextButton.addEventListener("click", nextQuestion);
+    back.addEventListener("click", prevQuestion);
+  </script>
+</html>
